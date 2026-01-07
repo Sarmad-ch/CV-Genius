@@ -6,7 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CV-Genius AI Builder</title>
     <script>
-      // Suppress the Tailwind Play CDN production warning for a cleaner console on Vercel
+      // Global error handler to diagnose "white page" issues in production
+      window.onerror = function(message, source, lineno, colno, error) {
+        console.error("Global Error Caught:", message, "at", source, ":", lineno);
+        // Display a user-friendly error if the app fails to mount
+        if (document.getElementById('root').innerHTML === "") {
+          document.getElementById('root').innerHTML = `
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#64748b;padding:20px;text-align:center;">
+              <h2 style="color:#1e293b;margin-bottom:8px;">Application Load Error</h2>
+              <p style="margin-bottom:16px;">There was a problem starting the application. Check the console for more details.</p>
+              <code style="background:#f1f5f9;padding:8px 12px;border-radius:6px;font-size:12px;max-width:100%;overflow-x:auto;">${message}</code>
+              <button onclick="location.reload()" style="margin-top:24px;padding:10px 20px;background:#4f46e5;color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Retry Load</button>
+            </div>
+          `;
+        }
+      };
+
+      // Suppress the Tailwind Play CDN production warning
       (function() {
         const originalWarn = console.warn;
         console.warn = function(message) {
@@ -23,7 +39,7 @@
     "react": "https://esm.sh/react@19.0.0",
     "react-dom": "https://esm.sh/react-dom@19.0.0",
     "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
-    "lucide-react": "https://esm.sh/lucide-react@0.475.0",
+    "lucide-react": "https://esm.sh/lucide-react@0.475.0?external=react",
     "@google/genai": "https://esm.sh/@google/genai@1.34.0",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
     "react/": "https://esm.sh/react@^19.2.3/"
@@ -36,6 +52,7 @@
         background-color: #f1f5f9;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+        margin: 0;
       }
       
       .custom-scrollbar::-webkit-scrollbar { width: 8px; }
@@ -50,8 +67,6 @@
         }
         body {
           background-color: white !important;
-          margin: 0 !important;
-          padding: 0 !important;
         }
         .no-print {
           display: none !important;
