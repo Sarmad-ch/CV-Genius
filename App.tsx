@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { ResumeCanvas } from './components/ResumeCanvas';
 import { Editor } from './components/Editor';
@@ -7,10 +7,10 @@ import { CVData, CVSection, SectionType, LayoutType } from './types';
 import { 
   FileText, 
   Download, 
-  Layout, 
+  Layout as LayoutIcon, 
   Sparkles, 
   RotateCcw,
-  Layers
+  Loader2
 } from 'lucide-react';
 
 const INITIAL_DATA: CVData = {
@@ -34,6 +34,22 @@ const INITIAL_DATA: CVData = {
       type: 'SUMMARY',
       title: 'Professional Summary',
       data: 'Results-driven Senior Software Engineer with 8+ years of experience building scalable web applications. Expert in React, Node.js, and Cloud Architecture.'
+    },
+    {
+      id: 'exp-1',
+      type: 'EXPERIENCE',
+      title: 'Work Experience',
+      data: [
+        {
+          id: 'item-1',
+          company: 'Tech Solutions Inc.',
+          position: 'Lead Developer',
+          location: 'Remote',
+          startDate: 'Jan 2021',
+          endDate: 'Present',
+          description: 'Architected and implemented high-traffic microservices.'
+        }
+      ]
     }
   ]
 };
@@ -41,12 +57,13 @@ const INITIAL_DATA: CVData = {
 export default function App() {
   const [cvData, setCvData] = useState<CVData>(INITIAL_DATA);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const addSection = (type: SectionType) => {
+  const addSection = useCallback((type: SectionType) => {
     const newSection: CVSection = {
       id: `${type.toLowerCase()}-${Date.now()}`,
       type,
-      title: type.charAt(0) + type.slice(1).toLowerCase(),
+      title: type === 'EXPERIENCE' ? 'Work Experience' : type.charAt(0) + type.slice(1).toLowerCase(),
       data: type === 'EXPERIENCE' || type === 'EDUCATION' || type === 'PROJECTS' ? [] : 
             type === 'SKILLS' ? ['React', 'TypeScript', 'Node.js'] : ''
     };
@@ -55,28 +72,28 @@ export default function App() {
       sections: [...prev.sections, newSection]
     }));
     setSelectedSectionId(newSection.id);
-  };
+  }, []);
 
-  const removeSection = (id: string) => {
+  const removeSection = useCallback((id: string) => {
     setCvData(prev => ({
       ...prev,
       sections: prev.sections.filter(s => s.id !== id)
     }));
     if (selectedSectionId === id) setSelectedSectionId(null);
-  };
+  }, [selectedSectionId]);
 
-  const updateSection = (id: string, newData: any) => {
+  const updateSection = useCallback((id: string, newData: any) => {
     setCvData(prev => ({
       ...prev,
       sections: prev.sections.map(s => s.id === id ? { ...s, data: newData } : s)
     }));
-  };
+  }, []);
 
-  const setLayout = (layout: LayoutType) => {
+  const setLayout = useCallback((layout: LayoutType) => {
     setCvData(prev => ({ ...prev, layout }));
-  };
+  }, []);
 
-  const moveSection = (id: string, direction: 'up' | 'down') => {
+  const moveSection = useCallback((id: string, direction: 'up' | 'down') => {
     const index = cvData.sections.findIndex(s => s.id === id);
     if (index === -1) return;
     if (direction === 'up' && index === 0) return;
@@ -87,83 +104,95 @@ export default function App() {
     [newSections[index], newSections[targetIndex]] = [newSections[targetIndex], newSections[index]];
     
     setCvData(prev => ({ ...prev, sections: newSections }));
-  };
+  }, [cvData.sections]);
 
-  const handlePrint = () => {
-    window.print();
+  const handleExport = () => {
+    setIsExporting(true);
+    setSelectedSectionId(null);
+    // Brief delay to allow UI to settle before browser print engine starts
+    setTimeout(() => {
+      window.print();
+      setIsExporting(false);
+    }, 500);
   };
 
   return (
-    <div className="flex flex-col h-screen bg-slate-50 text-slate-900 overflow-hidden">
-      {/* Navbar */}
-      <header className="no-print h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between z-10 shrink-0">
-        <div className="flex items-center gap-2">
+    <div className="flex flex-col h-screen bg-slate-100 text-slate-900 overflow-hidden font-sans">
+      {/* Top Navigation */}
+      <header className="no-print h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between z-20 shrink-0 shadow-sm">
+        <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
             <FileText size={22} />
           </div>
-          <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600">
-            CV-Genius
-          </h1>
+          <div className="flex flex-col">
+            <h1 className="text-lg font-black tracking-tight text-slate-900 leading-none">
+              CV-Genius <span className="text-indigo-600">AI</span>
+            </h1>
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Professional Builder</span>
+          </div>
         </div>
         
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg">
+          <div className="flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl border border-slate-200">
             {(['MODERN', 'CLASSIC', 'MINIMAL', 'COMPACT'] as LayoutType[]).map((l) => (
               <button
                 key={l}
                 onClick={() => setLayout(l)}
-                className={`px-3 py-1 text-xs font-bold rounded-md transition-all ${
+                className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all duration-300 uppercase tracking-tighter ${
                   cvData.layout === l 
-                    ? 'bg-white text-indigo-600 shadow-sm' 
+                    ? 'bg-white text-indigo-600 shadow-md scale-105' 
                     : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
-                {l.charAt(0) + l.slice(1).toLowerCase()}
+                {l}
               </button>
             ))}
           </div>
 
-          <div className="h-6 w-px bg-slate-200"></div>
+          <div className="h-8 w-px bg-slate-200"></div>
 
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setCvData(INITIAL_DATA)}
-              className="p-2 text-slate-400 hover:text-slate-600 transition-all"
-              title="Reset"
+              className="p-2 text-slate-400 hover:text-red-500 transition-all hover:bg-red-50 rounded-lg"
+              title="Reset Content"
             >
               <RotateCcw size={18} />
             </button>
             <button 
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-lg hover:bg-indigo-700 shadow-md shadow-indigo-100 transition-all active:scale-95"
+              onClick={handleExport}
+              disabled={isExporting}
+              className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all active:scale-95 disabled:opacity-70"
             >
-              <Download size={16} />
-              Export PDF
+              {isExporting ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />}
+              {isExporting ? 'Preparing...' : 'Export PDF'}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
+      {/* Workspace */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: Component Library */}
-        <div className="no-print w-72 shrink-0 border-r border-slate-200 bg-white flex flex-col p-6 overflow-y-auto">
+        {/* Component Library */}
+        <aside className="no-print w-72 shrink-0 border-r border-slate-200 bg-white flex flex-col p-6 overflow-y-auto z-10">
           <Sidebar onAddSection={addSection} />
-        </div>
+        </aside>
 
-        {/* Center: Resume Canvas */}
-        <main className="flex-1 overflow-y-auto p-12 bg-slate-100 custom-scrollbar flex justify-center items-start">
-          <ResumeCanvas 
-            data={cvData} 
-            selectedId={selectedSectionId}
-            onSelect={setSelectedSectionId}
-            onMove={moveSection}
-            onDelete={removeSection}
-          />
+        {/* Live Preview Canvas */}
+        <main className="flex-1 overflow-y-auto p-12 bg-slate-100 custom-scrollbar flex justify-center items-start scroll-smooth">
+          <div className="transform scale-[0.85] origin-top xl:scale-100 transition-transform duration-500">
+            <ResumeCanvas 
+              data={cvData} 
+              selectedId={selectedSectionId}
+              onSelect={setSelectedSectionId}
+              onMove={moveSection}
+              onDelete={removeSection}
+            />
+          </div>
         </main>
 
-        {/* Right: Property Editor */}
-        <div className="no-print w-96 shrink-0 border-l border-slate-200 bg-white flex flex-col p-6 overflow-y-auto">
+        {/* Contextual Editor */}
+        <aside className="no-print w-96 shrink-0 border-l border-slate-200 bg-white flex flex-col p-6 overflow-y-auto z-10">
           {selectedSectionId ? (
             <Editor 
               section={cvData.sections.find(s => s.id === selectedSectionId)!}
@@ -171,24 +200,22 @@ export default function App() {
               onClose={() => setSelectedSectionId(null)}
             />
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4">
-              <div className="p-4 bg-slate-50 rounded-full text-slate-400">
-                <Layout size={32} />
+            <div className="h-full flex flex-col items-center justify-center text-center p-8">
+              <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-300 mb-6 shadow-inner">
+                <LayoutIcon size={32} />
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-slate-700">No Section Selected</h3>
-                <p className="text-sm text-slate-500 mt-1">Select a section on the canvas to edit its properties or use the sidebar to add new components.</p>
-              </div>
+              <h3 className="text-lg font-bold text-slate-800">Ready to Edit</h3>
+              <p className="text-sm text-slate-400 mt-2 max-w-[200px] leading-relaxed">Select any section on the resume to customize its content with AI assistance.</p>
             </div>
           )}
-        </div>
+        </aside>
       </div>
 
-      {/* Mobile Indicator */}
+      {/* Print Instructions Overlay (Mobile/Small Screen) */}
       <div className="md:hidden fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-8 text-center">
-        <Sparkles className="w-16 h-16 text-indigo-600 mb-6" />
-        <h2 className="text-2xl font-bold mb-4">Desktop Experience Recommended</h2>
-        <p className="text-slate-600">For the best drag-and-drop building experience, please use a tablet or desktop computer.</p>
+        <Sparkles className="w-16 h-16 text-indigo-600 mb-6 animate-pulse" />
+        <h2 className="text-2xl font-black mb-4 tracking-tight">Large Screen Required</h2>
+        <p className="text-slate-500 text-sm leading-relaxed">This professional CV builder is optimized for desktop precision. Please switch to a larger device to continue building.</p>
       </div>
     </div>
   );
