@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CVData, CVSection, LayoutType } from '../types';
+import { CVData, CVSection, LayoutType } from '../types.ts';
 import { Trash2, ArrowUp, ArrowDown, Globe, Mail, Phone, MapPin } from 'lucide-react';
 
 interface ResumeCanvasProps {
@@ -77,7 +77,6 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
   );
 };
 
-// Extracted Title component to avoid scope-related TypeScript errors and fix 'children' missing issues
 const SectionTitle = ({ children, isClassic, isMinimal }: { children?: React.ReactNode; isClassic: boolean; isMinimal: boolean }) => (
   <h2 className={`text-sm font-bold text-slate-900 uppercase tracking-widest pb-1 mb-3 ${
     isClassic ? 'border-b border-slate-300 text-center' : 

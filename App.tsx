@@ -1,9 +1,9 @@
 
 import React, { useState, useCallback } from 'react';
-import { Sidebar } from './components/Sidebar';
-import { ResumeCanvas } from './components/ResumeCanvas';
-import { Editor } from './components/Editor';
-import { CVData, CVSection, SectionType, LayoutType } from './types';
+import { Sidebar } from './components/Sidebar.tsx';
+import { ResumeCanvas } from './components/ResumeCanvas.tsx';
+import { Editor } from './components/Editor.tsx';
+import { CVData, CVSection, SectionType, LayoutType } from './types.ts';
 import { 
   FileText, 
   Download, 
@@ -110,7 +110,6 @@ export default function App() {
   const handleExport = () => {
     setIsExporting(true);
     setSelectedSectionId(null);
-    // Give the UI a moment to hide focus rings and editors before printing
     setTimeout(() => {
       window.print();
       setIsExporting(false);
@@ -119,7 +118,6 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen bg-slate-100 text-slate-900 overflow-hidden font-sans">
-      {/* Top Navigation */}
       <header className="no-print h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between z-20 shrink-0 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
@@ -172,14 +170,11 @@ export default function App() {
         </div>
       </header>
 
-      {/* Workspace */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Component Library */}
         <aside className="no-print w-72 shrink-0 border-r border-slate-200 bg-white flex flex-col p-6 overflow-y-auto z-10 custom-scrollbar">
           <Sidebar onAddSection={addSection} />
         </aside>
 
-        {/* Live Preview Canvas */}
         <main className="flex-1 overflow-y-auto p-12 bg-slate-100 custom-scrollbar flex justify-center items-start scroll-smooth">
           <div className="transform scale-[0.8] lg:scale-[0.9] xl:scale-100 origin-top transition-transform duration-500">
             <ResumeCanvas 
@@ -192,7 +187,6 @@ export default function App() {
           </div>
         </main>
 
-        {/* Contextual Editor */}
         <aside className="no-print w-96 shrink-0 border-l border-slate-200 bg-white flex flex-col p-6 overflow-y-auto z-10 custom-scrollbar">
           {selectedSectionId ? (
             <Editor 
@@ -215,7 +209,6 @@ export default function App() {
         </aside>
       </div>
 
-      {/* Mobile Overlay */}
       <div className="md:hidden fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-8 text-center">
         <Sparkles className="w-16 h-16 text-indigo-600 mb-6 animate-pulse" />
         <h2 className="text-2xl font-black mb-4 tracking-tight">Large Screen Required</h2>

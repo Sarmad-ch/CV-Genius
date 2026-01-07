@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { SectionType } from '../types';
+import { SectionType } from '../types.ts';
 import { 
   User, 
   Briefcase, 

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { CVSection, ExperienceItem, EducationItem } from '../types';
-import { optimizeContent } from '../services/geminiService';
+import { CVSection, ExperienceItem, EducationItem } from '../types.ts';
+import { optimizeContent } from '../services/geminiService.ts';
 import { 
   X, 
   Sparkles, 
