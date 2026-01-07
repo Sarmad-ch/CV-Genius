@@ -5,6 +5,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CV-Genius AI Builder</title>
+    <script>
+      // Suppress the Tailwind Play CDN production warning for a cleaner console on Vercel
+      (function() {
+        const originalWarn = console.warn;
+        console.warn = function(message) {
+          if (typeof message === 'string' && message.includes('cdn.tailwindcss.com should not be used in production')) return;
+          originalWarn.apply(console, arguments);
+        };
+      })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script type="importmap">
@@ -28,11 +38,11 @@
         print-color-adjust: exact;
       }
       
-      /* Standard Screen View Scrollbar */
-      ::-webkit-scrollbar { width: 6px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-      ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      /* Custom Scrollbar for Workspace */
+      .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; border: 2px solid #f1f5f9; }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
       @media print {
         @page {
@@ -43,33 +53,32 @@
           background-color: white !important;
           margin: 0 !important;
           padding: 0 !important;
-          width: 210mm;
-          height: 297mm;
         }
         .no-print {
           display: none !important;
         }
         .resume-page {
           box-shadow: none !important;
-          margin: 0 !important;
-          padding: 15mm !important;
+          margin: 0 auto !important;
           width: 210mm !important;
           height: 297mm !important;
           min-height: 297mm !important;
+          padding: 15mm !important;
           display: block !important;
           page-break-after: avoid;
           page-break-before: avoid;
+          transform: none !important;
         }
-        /* Ensure background colors are printed */
+        /* Ensure background colors and borders are printed correctly */
         * {
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
       }
 
-      /* Transitions for layout switching */
+      /* Smooth transitions for UI elements */
       .layout-transition {
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
     </style>
   </head>

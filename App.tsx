@@ -10,7 +10,8 @@ import {
   Layout as LayoutIcon, 
   Sparkles, 
   RotateCcw,
-  Loader2
+  Loader2,
+  CheckCircle
 } from 'lucide-react';
 
 const INITIAL_DATA: CVData = {
@@ -109,11 +110,11 @@ export default function App() {
   const handleExport = () => {
     setIsExporting(true);
     setSelectedSectionId(null);
-    // Brief delay to allow UI to settle before browser print engine starts
+    // Give the UI a moment to hide focus rings and editors before printing
     setTimeout(() => {
       window.print();
       setIsExporting(false);
-    }, 500);
+    }, 700);
   };
 
   return (
@@ -162,9 +163,9 @@ export default function App() {
             <button 
               onClick={handleExport}
               disabled={isExporting}
-              className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all active:scale-95 disabled:opacity-70"
+              className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-xl shadow-indigo-100 transition-all active:scale-95 disabled:opacity-70 group"
             >
-              {isExporting ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />}
+              {isExporting ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} className="group-hover:translate-y-0.5 transition-transform" />}
               {isExporting ? 'Preparing...' : 'Export PDF'}
             </button>
           </div>
@@ -174,13 +175,13 @@ export default function App() {
       {/* Workspace */}
       <div className="flex flex-1 overflow-hidden">
         {/* Component Library */}
-        <aside className="no-print w-72 shrink-0 border-r border-slate-200 bg-white flex flex-col p-6 overflow-y-auto z-10">
+        <aside className="no-print w-72 shrink-0 border-r border-slate-200 bg-white flex flex-col p-6 overflow-y-auto z-10 custom-scrollbar">
           <Sidebar onAddSection={addSection} />
         </aside>
 
         {/* Live Preview Canvas */}
         <main className="flex-1 overflow-y-auto p-12 bg-slate-100 custom-scrollbar flex justify-center items-start scroll-smooth">
-          <div className="transform scale-[0.85] origin-top xl:scale-100 transition-transform duration-500">
+          <div className="transform scale-[0.8] lg:scale-[0.9] xl:scale-100 origin-top transition-transform duration-500">
             <ResumeCanvas 
               data={cvData} 
               selectedId={selectedSectionId}
@@ -192,7 +193,7 @@ export default function App() {
         </main>
 
         {/* Contextual Editor */}
-        <aside className="no-print w-96 shrink-0 border-l border-slate-200 bg-white flex flex-col p-6 overflow-y-auto z-10">
+        <aside className="no-print w-96 shrink-0 border-l border-slate-200 bg-white flex flex-col p-6 overflow-y-auto z-10 custom-scrollbar">
           {selectedSectionId ? (
             <Editor 
               section={cvData.sections.find(s => s.id === selectedSectionId)!}
@@ -206,12 +207,15 @@ export default function App() {
               </div>
               <h3 className="text-lg font-bold text-slate-800">Ready to Edit</h3>
               <p className="text-sm text-slate-400 mt-2 max-w-[200px] leading-relaxed">Select any section on the resume to customize its content with AI assistance.</p>
+              <div className="mt-8 flex items-center gap-2 text-[10px] font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-full uppercase tracking-widest border border-green-100">
+                <CheckCircle size={12} /> Auto-saving enabled
+              </div>
             </div>
           )}
         </aside>
       </div>
 
-      {/* Print Instructions Overlay (Mobile/Small Screen) */}
+      {/* Mobile Overlay */}
       <div className="md:hidden fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center p-8 text-center">
         <Sparkles className="w-16 h-16 text-indigo-600 mb-6 animate-pulse" />
         <h2 className="text-2xl font-black mb-4 tracking-tight">Large Screen Required</h2>
